@@ -13,6 +13,9 @@ public interface IToken {
 		TIMES, //*
 		INT,   // 1, 2, 3, 4
 		ERROR,
+		EXP,	//Exponential: ^
+		LPAREN, // '('
+		RPAREN,	// ')'
 		EOF
 	}
 	

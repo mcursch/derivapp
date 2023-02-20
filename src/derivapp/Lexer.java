@@ -73,8 +73,8 @@ public class Lexer implements ILexer {
 		//repeat indef until EOF token is found
 		while(true) {
 			ch = chars[pos];
-			show("pos is " + pos);
-			show(ch);
+			
+			
 			switch(state) {
 			//no state entered yet, still checking to see
 			case START:
@@ -85,22 +85,34 @@ public class Lexer implements ILexer {
 				ch = chars[pos];
 				
 				switch(ch) {
+				case '(':
+					Token lparen_token = new Token(Kind.LPAREN, "(", 0, 0, 1);
+					tokens.add(lparen_token);
+					inc();
+					break;
+				case ')':
+					Token rparen_token = new Token(Kind.RPAREN, ")", 0, 0, 1);
+					tokens.add(rparen_token);
+					inc();
+					break;
 				case 'x':
-					show("in var");
 					Token var_token = new Token(Kind.VAR, "x", line, startPos, 1);
 					tokens.add(var_token);
+					inc();
+					break;
+				case '^':
+					show("have exp");
+					Token exp_token = new Token(Kind.EXP, "^", 0,0,1);
+					tokens.add(exp_token);
 					inc();
 					break;
 				case ' ':
 					inc();
 					break;
 				case  '1','2','3','4','5','6','7','8','9':
-					show("in num");
 					state = State.HAVE_NUMB;
-					
 					break;
 				case '+':
-					show("in plus");
 					Token plus_token = new Token(Kind.PLUS, "+", 0,0, 1);
 					tokens.add(plus_token);
 					inc();
@@ -121,7 +133,6 @@ public class Lexer implements ILexer {
 					inc();
 					break;
 				case '\0':
-					show("found eof");
 					state = State.HAVE_EOF;
 					break;
 				}
@@ -129,18 +140,17 @@ public class Lexer implements ILexer {
 			case HAVE_NUMB:
 				switch(ch) {
 				case '0','1','2','3','4','5','6','7','8','9':
-					show("stuck" + ch);
-					show(pos);
+					show("numbr found");
 					inc();
 					break;	
 				case 'x':
 					// @ TODO: implement this part with proper line markings for the var_token
 					Token var_token = new Token(Kind.VAR, "", 0,0,0);
+					tokens.add(var_token);
 					inc();
 					state = State.START;
 					break;
 				default:
-					show("adding num token");
 					Token int_token = new Token(Kind.INT, input.substring(startPos2,pos), 0,0,pos-startPos2);
 					try
 					{
@@ -159,7 +169,6 @@ public class Lexer implements ILexer {
 				
 
 			case HAVE_EOF:
-				show("have eof");
 				Token EOF_token = new Token(Kind.EOF, "EOF",0,0,1);
 				tokens.add(EOF_token);
 				return;
