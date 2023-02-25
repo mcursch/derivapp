@@ -14,4 +14,5 @@ public interface ASTVisitor {
 
 	Object visitProgram(Program program, Object arg) throws Exception;
 
+	Object visitExponentialExpr(ExponentialExpr expExpr, Object arg) throws Exception;
 }

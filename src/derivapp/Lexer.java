@@ -38,7 +38,7 @@ public class Lexer implements ILexer {
 	@Override
 	public IToken next() throws LexicalException {
 		if(tokens.get(tokenPos).kind == Kind.ERROR) {
-			
+			throw new LexicalException("error");
 		}
 		return tokens.get(tokenPos++);
 	}

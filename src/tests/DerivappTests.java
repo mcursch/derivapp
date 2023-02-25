@@ -104,17 +104,13 @@ public class DerivappTests {
 			show(input);
 			ILexer lexer = getLexer(input);
 			
-
 			checkToken(lexer.next(), Kind.LPAREN);
 			checkToken(lexer.next(), Kind.VAR);
-
 			checkToken(lexer.next(), Kind.PLUS);
 			checkToken(lexer.next(), Kind.INT);
 			checkToken(lexer.next(), Kind.RPAREN);
-
 			checkToken(lexer.next(), Kind.PLUS);
 			checkToken(lexer.next(), Kind.LPAREN);
-
 			checkToken(lexer.next(), Kind.VAR);
 			checkToken(lexer.next(), Kind.MINUS);			
 			checkToken(lexer.next(), Kind.INT);

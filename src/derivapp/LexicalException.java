@@ -3,7 +3,7 @@ package derivapp;
 import derivapp.IToken.SourceLocation;
 
 @SuppressWarnings("serial")
-public class LexicalException extends DerivException{
+public class LexicalException extends DAException{
 	public LexicalException(String error_message, SourceLocation loc) {
 		super(error_message, loc);
 	}

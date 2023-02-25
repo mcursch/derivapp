@@ -1,10 +1,8 @@
-package edu.ufl.cise.plc.ast;
-
-import edu.ufl.cise.plc.IToken;
+package derivapp.ast;
+import derivapp.IToken;
 
 public class IdentExpr extends Expr {
 	
-	Declaration dec;
 		
 	public IdentExpr(IToken firstToken) {
 		super(firstToken);
@@ -17,16 +15,10 @@ public class IdentExpr extends Expr {
 
 	@Override
 	public String toString() {
-		return "IdentExpr [dec=" + dec + ", type=" + type + ", coerceTo=" + coerceTo + "]";
+		return "method toString not fully implemented";
+		//should probably return values here
 	}
 
-	public Declaration getDec() {
-		return dec;
-	}
-
-	public void setDec(Declaration dec) {
-		this.dec = dec;
-	}
 
 	
 }
