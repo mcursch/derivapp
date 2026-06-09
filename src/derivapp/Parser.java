@@ -87,15 +87,28 @@ public class Parser implements IParser{
 			IToken firstToken = t;
 			IToken op = t;
 			consume();
-			
+
 			Expr e = UnaryExpr();
 			Expr left = new UnaryExpr(firstToken, op, e);
 			return left;
 		}
 		else
 		{
-			return PrimaryExpr();
+			return ExponentialExpr();
 		}
+	}
+
+	// base ^ exponent (right-associative)
+	public Expr ExponentialExpr() throws DAException {
+		IToken firstToken = t;
+		Expr base = PrimaryExpr();
+		if (isKind(Kind.EXP)) {
+			IToken expTok = t;
+			consume();
+			Expr exponent = UnaryExpr(); // right-associative
+			return new derivapp.ast.ExponentialExpr(firstToken, base, exponent);
+		}
+		return base;
 	}
 	//gives us a way to loop back around to recursively define expressions
 
