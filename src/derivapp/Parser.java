@@ -32,7 +32,7 @@ public class Parser implements IParser{
 		{
 			equation.add(expr());
 		}
-		return null;
+		return new Program(firstToken, equation);
 	}
 
 	
@@ -100,13 +100,23 @@ public class Parser implements IParser{
 	//gives us a way to loop back around to recursively define expressions
 
 	public Expr PrimaryExpr() throws DAException {
+		IToken firstToken = t;
 		Expr e = null;
 		if(t.getKind() == Kind.LPAREN) {
-			
 			consume();
 			e = expr();
 			match(Kind.RPAREN);
-			 
+		}
+		else if(t.getKind() == Kind.INT) {
+			e = new IntLitExpr(firstToken);
+			consume();
+		}
+		else if(t.getKind() == Kind.VAR) {
+			e = new IdentExpr(firstToken);
+			consume();
+		}
+		else {
+			throw new SyntaxException("Unexpected token: " + t.getText(), t.getSourceLocation());
 		}
 		return e;
 	}
