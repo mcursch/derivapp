@@ -13,6 +13,10 @@ public class Program extends ASTNode {
 		this.equation = equation;
 	}
 
+	public List<ASTNode> getEquation() {
+		return equation;
+	}
+
 	@Override
 	public Object visit(ASTVisitor v, Object arg) throws Exception {
 		return v.visitProgram(this, arg);
