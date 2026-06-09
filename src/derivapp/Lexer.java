@@ -109,6 +109,11 @@ public class Lexer implements ILexer {
 				case ' ':
 					inc();
 					break;
+				case '\n':
+					line++;
+					col = 0;
+					pos++;
+					break;
 				case  '1','2','3','4','5','6','7','8','9':
 					state = State.HAVE_NUMB;
 					break;
@@ -118,17 +123,17 @@ public class Lexer implements ILexer {
 					inc();
 					break;
 				case '-':
-					Token minus_token = new Token(Kind.MINUS, "+", 0,0, 1);
+					Token minus_token = new Token(Kind.MINUS, "-", 0,0, 1);
 					tokens.add(minus_token);
 					inc();
 					break;
 				case '*':
-					Token times_token = new Token(Kind.TIMES, "+", 0,0, 1);
+					Token times_token = new Token(Kind.TIMES, "*", 0,0, 1);
 					tokens.add(times_token);
 					inc();
 					break;
 				case '/':
-					Token div_token = new Token(Kind.DIV, "+", 0,0, 1);
+					Token div_token = new Token(Kind.DIV, "/", 0,0, 1);
 					tokens.add(div_token);
 					inc();
 					break;
@@ -144,8 +149,7 @@ public class Lexer implements ILexer {
 					inc();
 					break;	
 				case 'x':
-					// @ TODO: implement this part with proper line markings for the var_token
-					Token var_token = new Token(Kind.VAR, "", 0,0,0);
+					Token var_token = new Token(Kind.VAR, "x", line, col, 1);
 					tokens.add(var_token);
 					inc();
 					state = State.START;
