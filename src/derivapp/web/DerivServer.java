@@ -59,7 +59,7 @@ public class DerivServer {
                 ComputeRequest req = ctx.bodyAsClass(ComputeRequest.class);
 
                 // 1. Parse expression
-                Program program = CompilerComponentFactory.getParser(req.expression).program();
+                Program program = (Program) CompilerComponentFactory.getParser(req.expression).parse();
 
                 // 2. Evaluate f(x)
                 double evaluated = new Evaluator(Map.of("x", req.x)).evaluate(program);

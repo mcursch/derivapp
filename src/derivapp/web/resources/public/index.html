@@ -209,6 +209,10 @@
     <div id="results" class="results hidden">
       <h2>Results</h2>
       <div class="result-row">
+        <span class="result-label">f(x) =</span>
+        <span class="result-value" id="val-expr"></span>
+      </div>
+      <div class="result-row">
         <span class="result-label" id="label-fx"></span>
         <span class="result-value number" id="val-fx"></span>
       </div>
@@ -269,6 +273,7 @@
         } else {
           const xDisplay = formatNumber(x);
 
+          document.getElementById('val-expr').textContent = expression;
           document.getElementById('label-fx').textContent = `f(${xDisplay}) =`;
           document.getElementById('val-fx').textContent = formatNumber(data.evaluated);
           document.getElementById('val-deriv').textContent = data.derivative;
