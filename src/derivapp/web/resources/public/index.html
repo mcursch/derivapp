@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DerivApp</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2d3147;
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      color: #94a3b8;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #94a3b8;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.3px;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.3rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: #0f1117;
+      border: 1px solid #2d3147;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 1rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: #818cf8;
+    }
+
+    input[type="text"]::placeholder,
+    input[type="number"]::placeholder {
+      color: #475569;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .results {
+      margin-top: 2rem;
+      border-top: 1px solid #2d3147;
+      padding-top: 1.5rem;
+    }
+
+    .results h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #1e2235;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .result-label {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+
+    .result-value {
+      color: #a78bfa;
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
+
+    .result-value.number {
+      color: #34d399;
+    }
+
+    .error-box {
+      margin-top: 1.5rem;
+      background: #2d1b1b;
+      border: 1px solid #7f1d1d;
+      border-radius: 8px;
+      padding: 0.9rem 1.1rem;
+      color: #fca5a5;
+      font-size: 0.9rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>DerivApp</h1>
+      <p>Symbolic Derivative Calculator</p>
+    </div>
+
+    <div class="form-group">
+      <label for="expression">Expression</label>
+      <input type="text" id="expression" placeholder="e.g. x^2 + 3*x + 1" autocomplete="off" spellcheck="false" />
+      <div class="hint">Only <code>x</code> is supported as a variable name.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="xval">Value of x</label>
+      <input type="number" id="xval" placeholder="e.g. 2" step="any" />
+    </div>
+
+    <button id="calc-btn" onclick="calculate()">Calculate</button>
+
+    <div id="error-box" class="error-box hidden"></div>
+
+    <div id="results" class="results hidden">
+      <h2>Results</h2>
+      <div class="result-row">
+        <span class="result-label" id="label-fx"></span>
+        <span class="result-value number" id="val-fx"></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">f'(x) =</span>
+        <span class="result-value" id="val-deriv"></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label" id="label-fpx"></span>
+        <span class="result-value number" id="val-fpx"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function calculate() {
+      const exprInput = document.getElementById('expression');
+      const xInput = document.getElementById('xval');
+      const btn = document.getElementById('calc-btn');
+      const errorBox = document.getElementById('error-box');
+      const results = document.getElementById('results');
+
+      const expression = exprInput.value.trim();
+      const xVal = xInput.value.trim();
+
+      if (!expression) {
+        showError('Please enter an expression.');
+        return;
+      }
+      if (xVal === '') {
+        showError('Please enter a value for x.');
+        return;
+      }
+
+      const x = parseFloat(xVal);
+      if (isNaN(x)) {
+        showError('Value of x must be a number.');
+        return;
+      }
+
+      // Hide previous output
+      errorBox.classList.add('hidden');
+      results.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Calculating…';
+
+      try {
+        const response = await fetch('/api/compute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expression, x })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          showError(data.error);
+        } else {
+          const xDisplay = formatNumber(x);
+
+          document.getElementById('label-fx').textContent = `f(${xDisplay}) =`;
+          document.getElementById('val-fx').textContent = formatNumber(data.evaluated);
+          document.getElementById('val-deriv').textContent = data.derivative;
+          document.getElementById('label-fpx').textContent = `f'(${xDisplay}) =`;
+          document.getElementById('val-fpx').textContent = formatNumber(data.derivativeValue);
+
+          results.classList.remove('hidden');
+        }
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Calculate';
+      }
+    }
+
+    function formatNumber(n) {
+      // Show up to 10 significant digits, strip trailing zeros
+      return parseFloat(n.toPrecision(10)).toString();
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById('error-box');
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
+      document.getElementById('results').classList.add('hidden');
+    }
+
+    // Allow Enter key to trigger calculation
+    document.addEventListener('DOMContentLoaded', () => {
+      ['expression', 'xval'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', e => {
+          if (e.key === 'Enter') calculate();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
