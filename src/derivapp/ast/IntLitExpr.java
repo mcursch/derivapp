@@ -19,12 +19,7 @@ public class IntLitExpr extends Expr {
 
 	@Override
 	public String toString() {
-		return "IntLitExpr [type=" + type + ", coerceTo=" + coerceTo + "]";
+		return "IntLitExpr [getValue()=" + getValue() + "]";
 	}
-
-//	@Override
-//	public String toString() {
-//		return "IntLitExpr [getValue()=" + getValue() + "]";
-//	}
 
 }

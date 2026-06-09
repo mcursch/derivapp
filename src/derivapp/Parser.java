@@ -32,7 +32,7 @@ public class Parser implements IParser{
 		{
 			equation.add(expr());
 		}
-		return null;
+		return new Program(firstToken, equation);
 	}
 
 	
@@ -87,26 +87,49 @@ public class Parser implements IParser{
 			IToken firstToken = t;
 			IToken op = t;
 			consume();
-			
+
 			Expr e = UnaryExpr();
 			Expr left = new UnaryExpr(firstToken, op, e);
 			return left;
 		}
 		else
 		{
-			return PrimaryExpr();
+			return ExponentialExpr();
 		}
+	}
+
+	// base ^ exponent (right-associative)
+	public Expr ExponentialExpr() throws DAException {
+		IToken firstToken = t;
+		Expr base = PrimaryExpr();
+		if (isKind(Kind.EXP)) {
+			IToken expTok = t;
+			consume();
+			Expr exponent = UnaryExpr(); // right-associative
+			return new derivapp.ast.ExponentialExpr(firstToken, base, exponent);
+		}
+		return base;
 	}
 	//gives us a way to loop back around to recursively define expressions
 
 	public Expr PrimaryExpr() throws DAException {
+		IToken firstToken = t;
 		Expr e = null;
 		if(t.getKind() == Kind.LPAREN) {
-			
 			consume();
 			e = expr();
 			match(Kind.RPAREN);
-			 
+		}
+		else if(t.getKind() == Kind.INT) {
+			e = new IntLitExpr(firstToken);
+			consume();
+		}
+		else if(t.getKind() == Kind.VAR) {
+			e = new IdentExpr(firstToken);
+			consume();
+		}
+		else {
+			throw new SyntaxException("Unexpected token: " + t.getText(), t.getSourceLocation());
 		}
 		return e;
 	}
