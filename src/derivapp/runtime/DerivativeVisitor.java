@@ -137,37 +137,28 @@ public class DerivativeVisitor implements ASTVisitor {
         Expr fPrime = (Expr) f.visit(this, arg);
         Expr gPrime = (Expr) g.visit(this, arg);
 
-        return switch (op) {
-            case PLUS, MINUS -> {
-                // d/dx(f ± g) = f' ± g'
-                IToken opTok = makeSyntheticToken(op, op == Kind.PLUS ? "+" : "-");
-                yield makeBinary(fPrime, opTok, gPrime);
-            }
-            case TIMES -> {
-                // d/dx(f * g) = f'*g + f*g'
-                IToken timesTok = makeSyntheticToken(Kind.TIMES, "*");
-                IToken plusTok  = makeSyntheticToken(Kind.PLUS,  "+");
-                Expr left  = makeBinary(fPrime, timesTok, g);
-                Expr right = makeBinary(f,      timesTok, gPrime);
-                yield makeBinary(left, plusTok, right);
-            }
-            case DIV -> {
-                // d/dx(f / g) = (f'g - fg') / g²
-                IToken timesTok = makeSyntheticToken(Kind.TIMES, "*");
-                IToken minusTok = makeSyntheticToken(Kind.MINUS, "-");
-                IToken divTok   = makeSyntheticToken(Kind.DIV,   "/");
-                IToken expTok   = makeSyntheticToken(Kind.EXP,   "^");
-
-                Expr numerator = makeBinary(
-                        makeBinary(fPrime, timesTok, g),
-                        minusTok,
-                        makeBinary(f, timesTok, gPrime));
-                Expr denominator = new ExponentialExpr(expTok, g, makeIntLit(2));
-                yield makeBinary(numerator, divTok, denominator);
-            }
-            default -> throw new DARuntimeException(
-                    "Unsupported binary operator in derivative: " + binaryExpr.getOp().getText());
-        };
+        if (op == Kind.PLUS || op == Kind.MINUS) {
+            IToken opTok = makeSyntheticToken(op, op == Kind.PLUS ? "+" : "-");
+            return makeBinary(fPrime, opTok, gPrime);
+        } else if (op == Kind.TIMES) {
+            IToken timesTok = makeSyntheticToken(Kind.TIMES, "*");
+            IToken plusTok  = makeSyntheticToken(Kind.PLUS,  "+");
+            Expr left  = makeBinary(fPrime, timesTok, g);
+            Expr right = makeBinary(f,      timesTok, gPrime);
+            return makeBinary(left, plusTok, right);
+        } else if (op == Kind.DIV) {
+            IToken timesTok = makeSyntheticToken(Kind.TIMES, "*");
+            IToken minusTok = makeSyntheticToken(Kind.MINUS, "-");
+            IToken divTok   = makeSyntheticToken(Kind.DIV,   "/");
+            IToken expTok   = makeSyntheticToken(Kind.EXP,   "^");
+            Expr numerator = makeBinary(
+                    makeBinary(fPrime, timesTok, g),
+                    minusTok,
+                    makeBinary(f, timesTok, gPrime));
+            Expr denominator = new ExponentialExpr(expTok, g, makeIntLit(2));
+            return makeBinary(numerator, divTok, denominator);
+        }
+        throw new DARuntimeException("Unsupported binary operator in derivative: " + binaryExpr.getOp().getText());
     }
 
     /**
@@ -251,17 +242,10 @@ public class DerivativeVisitor implements ASTVisitor {
 
     /** Returns true if the expression is the integer literal 0. */
     private boolean isZero(Expr e) {
-        if (e instanceof IntLitExpr ile) {
-            return ile.getValue() == 0;
-        }
-        return false;
+        return (e instanceof IntLitExpr) && ((IntLitExpr) e).getValue() == 0;
     }
 
-    /** Returns true if the expression is the integer literal 1. */
     private boolean isOne(Expr e) {
-        if (e instanceof IntLitExpr ile) {
-            return ile.getValue() == 1;
-        }
-        return false;
+        return (e instanceof IntLitExpr) && ((IntLitExpr) e).getValue() == 1;
     }
 }

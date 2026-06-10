@@ -71,13 +71,12 @@ public class PrintVisitor implements ASTVisitor {
         String right = (String) binaryExpr.getRight().visit(this, arg);
         Kind op = binaryExpr.getOp().getKind();
 
-        String opStr = switch (op) {
-            case PLUS  -> "+";
-            case MINUS -> "-";
-            case TIMES -> "*";
-            case DIV   -> "/";
-            default    -> binaryExpr.getOp().getText();
-        };
+        String opStr;
+        if (op == Kind.PLUS)       opStr = "+";
+        else if (op == Kind.MINUS) opStr = "-";
+        else if (op == Kind.TIMES) opStr = "*";
+        else if (op == Kind.DIV)   opStr = "/";
+        else                       opStr = binaryExpr.getOp().getText();
 
         return "(" + left + opStr + right + ")";
     }

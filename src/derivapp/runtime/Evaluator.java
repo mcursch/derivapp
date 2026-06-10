@@ -82,19 +82,14 @@ public class Evaluator implements ASTVisitor {
         double right = (Double) binaryExpr.getRight().visit(this, arg);
         Kind op = binaryExpr.getOp().getKind();
 
-        return switch (op) {
-            case PLUS  -> left + right;
-            case MINUS -> left - right;
-            case TIMES -> left * right;
-            case DIV   -> {
-                if (right == 0.0) {
-                    throw new DARuntimeException("Division by zero");
-                }
-                yield left / right;
-            }
-            default -> throw new DARuntimeException(
-                    "Unsupported binary operator: " + binaryExpr.getOp().getText());
-        };
+        if (op == Kind.PLUS)  return left + right;
+        if (op == Kind.MINUS) return left - right;
+        if (op == Kind.TIMES) return left * right;
+        if (op == Kind.DIV) {
+            if (right == 0.0) throw new DARuntimeException("Division by zero");
+            return left / right;
+        }
+        throw new DARuntimeException("Unsupported binary operator: " + binaryExpr.getOp().getText());
     }
 
     @Override
@@ -102,12 +97,9 @@ public class Evaluator implements ASTVisitor {
         double operand = (Double) unaryExpr.getExpr().visit(this, arg);
         Kind op = unaryExpr.getOp().getKind();
 
-        return switch (op) {
-            case MINUS -> -operand;
-            case PLUS  ->  operand;
-            default -> throw new DARuntimeException(
-                    "Unsupported unary operator: " + unaryExpr.getOp().getText());
-        };
+        if (op == Kind.MINUS) return -operand;
+        if (op == Kind.PLUS)  return operand;
+        throw new DARuntimeException("Unsupported unary operator: " + unaryExpr.getOp().getText());
     }
 
     @Override

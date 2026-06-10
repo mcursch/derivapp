@@ -103,13 +103,15 @@ public class SimplificationVisitor implements ASTVisitor {
                 return makeIntLit(0);
             }
             // -(-e) → e
-            if (inner instanceof UnaryExpr innerUnary
-                    && innerUnary.getOp().getKind() == Kind.MINUS) {
-                return innerUnary.getExpr();
+            if (inner instanceof UnaryExpr) {
+                UnaryExpr innerUnary = (UnaryExpr) inner;
+                if (innerUnary.getOp().getKind() == Kind.MINUS) {
+                    return innerUnary.getExpr();
+                }
             }
             // constant folding for unary minus on int literal
-            if (inner instanceof IntLitExpr ile) {
-                return makeIntLit(-ile.getValue());
+            if (inner instanceof IntLitExpr) {
+                return makeIntLit(-((IntLitExpr) inner).getValue());
             }
         }
 
@@ -127,56 +129,41 @@ public class SimplificationVisitor implements ASTVisitor {
         Kind op    = binaryExpr.getOp().getKind();
         IToken opTok = binaryExpr.getOp();
 
-        switch (op) {
-            case PLUS -> {
-                // 0 + e → e
-                if (isZero(left))  return right;
-                // e + 0 → e
-                if (isZero(right)) return left;
-                // constant folding
-                if (left instanceof IntLitExpr l && right instanceof IntLitExpr r) {
-                    return makeIntLit(l.getValue() + r.getValue());
-                }
+        if (op == Kind.PLUS) {
+            if (isZero(left))  return right;
+            if (isZero(right)) return left;
+            if (left instanceof IntLitExpr && right instanceof IntLitExpr) {
+                return makeIntLit(((IntLitExpr) left).getValue() + ((IntLitExpr) right).getValue());
             }
-            case MINUS -> {
-                // e - 0 → e
-                if (isZero(right)) return left;
-                // 0 - e → -e  (only useful when e is non-trivial)
-                if (isZero(left)) {
-                    if (right instanceof IntLitExpr r) {
-                        return makeIntLit(-r.getValue());
-                    }
-                    IToken minusTok = makeSyntheticToken(Kind.MINUS, "-");
-                    return new UnaryExpr(minusTok, minusTok, right);
+        } else if (op == Kind.MINUS) {
+            if (isZero(right)) return left;
+            if (isZero(left)) {
+                if (right instanceof IntLitExpr) {
+                    return makeIntLit(-((IntLitExpr) right).getValue());
                 }
-                // constant folding
-                if (left instanceof IntLitExpr l && right instanceof IntLitExpr r) {
-                    return makeIntLit(l.getValue() - r.getValue());
-                }
+                IToken minusTok = makeSyntheticToken(Kind.MINUS, "-");
+                return new UnaryExpr(minusTok, minusTok, right);
             }
-            case TIMES -> {
-                // 0 * e → 0  and  e * 0 → 0
-                if (isZero(left) || isZero(right)) return makeIntLit(0);
-                // 1 * e → e  and  e * 1 → e
-                if (isOne(left))  return right;
-                if (isOne(right)) return left;
-                // constant folding
-                if (left instanceof IntLitExpr l && right instanceof IntLitExpr r) {
-                    return makeIntLit(l.getValue() * r.getValue());
-                }
+            if (left instanceof IntLitExpr && right instanceof IntLitExpr) {
+                return makeIntLit(((IntLitExpr) left).getValue() - ((IntLitExpr) right).getValue());
             }
-            case DIV -> {
-                // 0 / e → 0  (assuming e != 0; we don't check at simplification time)
-                if (isZero(left)) return makeIntLit(0);
-                // e / 1 → e
-                if (isOne(right)) return left;
-                // constant folding for integer division
-                if (left instanceof IntLitExpr l && right instanceof IntLitExpr r
-                        && r.getValue() != 0 && l.getValue() % r.getValue() == 0) {
+        } else if (op == Kind.TIMES) {
+            if (isZero(left) || isZero(right)) return makeIntLit(0);
+            if (isOne(left))  return right;
+            if (isOne(right)) return left;
+            if (left instanceof IntLitExpr && right instanceof IntLitExpr) {
+                return makeIntLit(((IntLitExpr) left).getValue() * ((IntLitExpr) right).getValue());
+            }
+        } else if (op == Kind.DIV) {
+            if (isZero(left)) return makeIntLit(0);
+            if (isOne(right)) return left;
+            if (left instanceof IntLitExpr && right instanceof IntLitExpr) {
+                IntLitExpr l = (IntLitExpr) left;
+                IntLitExpr r = (IntLitExpr) right;
+                if (r.getValue() != 0 && l.getValue() % r.getValue() == 0) {
                     return makeIntLit(l.getValue() / r.getValue());
                 }
             }
-            default -> { /* no simplification for other ops */ }
         }
 
         return new BinaryExpr(opTok, left, opTok, right);
@@ -199,10 +186,10 @@ public class SimplificationVisitor implements ASTVisitor {
         if (isOne(exponent))  return base;
 
         // constant folding: int^int (non-negative exponent only)
-        if (base instanceof IntLitExpr b && exponent instanceof IntLitExpr e) {
-            int exp = e.getValue();
+        if (base instanceof IntLitExpr && exponent instanceof IntLitExpr) {
+            int exp = ((IntLitExpr) exponent).getValue();
             if (exp >= 0) {
-                int result = (int) Math.pow(b.getValue(), exp);
+                int result = (int) Math.pow(((IntLitExpr) base).getValue(), exp);
                 return makeIntLit(result);
             }
         }
@@ -225,10 +212,10 @@ public class SimplificationVisitor implements ASTVisitor {
     }
 
     private boolean isZero(Expr e) {
-        return e instanceof IntLitExpr ile && ile.getValue() == 0;
+        return (e instanceof IntLitExpr) && ((IntLitExpr) e).getValue() == 0;
     }
 
     private boolean isOne(Expr e) {
-        return e instanceof IntLitExpr ile && ile.getValue() == 1;
+        return (e instanceof IntLitExpr) && ((IntLitExpr) e).getValue() == 1;
     }
 }
